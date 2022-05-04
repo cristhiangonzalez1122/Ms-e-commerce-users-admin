@@ -1,4 +1,5 @@
-import {Entity, model, property, hasOne} from '@loopback/repository';
+/* eslint-disable @typescript-eslint/naming-convention */
+import {Entity, model, property, belongsTo} from '@loopback/repository';
 import {Role} from './role.model';
 
 @model()
@@ -40,13 +41,8 @@ export class Usuario extends Entity {
   })
   celular: string;
 
-  @hasOne(() => Role, {keyTo: 'id_role'})
-  tiene_un: Role;
-
-  @property({
-    type: 'string',
-  })
-  id_role?: string;
+  @belongsTo(() => Role, {name: 'tiene_un'})
+  id_role: string;
 
   constructor(data?: Partial<Usuario>) {
     super(data);

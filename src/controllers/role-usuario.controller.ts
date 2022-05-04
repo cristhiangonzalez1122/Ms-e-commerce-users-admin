@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import {
   Count,
   CountSchema,
@@ -15,16 +16,13 @@ import {
   post,
   requestBody,
 } from '@loopback/rest';
-import {
-  Role,
-  Usuario,
-} from '../models';
+import {Role, Usuario} from '../models';
 import {RoleRepository} from '../repositories';
 
 export class RoleUsuarioController {
   constructor(
     @repository(RoleRepository) protected roleRepository: RoleRepository,
-  ) { }
+  ) {}
 
   @get('/roles/{id}/usuarios', {
     responses: {
@@ -54,18 +52,19 @@ export class RoleUsuarioController {
     },
   })
   async create(
-    @param.path.string('id') id: typeof Role.prototype._id,
+    @param.path.string('id') id: typeof Role.prototype.id,
     @requestBody({
       content: {
         'application/json': {
           schema: getModelSchemaRef(Usuario, {
             title: 'NewUsuarioInRole',
             exclude: ['id'],
-            optional: ['id_role']
+            optional: ['id_role'],
           }),
         },
       },
-    }) usuario: Omit<Usuario, 'id'>,
+    })
+    usuario: Omit<Usuario, 'id'>,
   ): Promise<Usuario> {
     return this.roleRepository.usuarios(id).create(usuario);
   }
@@ -88,7 +87,8 @@ export class RoleUsuarioController {
       },
     })
     usuario: Partial<Usuario>,
-    @param.query.object('where', getWhereSchemaFor(Usuario)) where?: Where<Usuario>,
+    @param.query.object('where', getWhereSchemaFor(Usuario))
+    where?: Where<Usuario>,
   ): Promise<Count> {
     return this.roleRepository.usuarios(id).patch(usuario, where);
   }
@@ -103,7 +103,8 @@ export class RoleUsuarioController {
   })
   async delete(
     @param.path.string('id') id: string,
-    @param.query.object('where', getWhereSchemaFor(Usuario)) where?: Where<Usuario>,
+    @param.query.object('where', getWhereSchemaFor(Usuario))
+    where?: Where<Usuario>,
   ): Promise<Count> {
     return this.roleRepository.usuarios(id).delete(where);
   }

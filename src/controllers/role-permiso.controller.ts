@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import {
   Count,
   CountSchema,
@@ -5,7 +6,7 @@ import {
   repository,
   Where,
 } from '@loopback/repository';
-  import {
+import {
   del,
   get,
   getModelSchemaRef,
@@ -15,17 +16,13 @@ import {
   post,
   requestBody,
 } from '@loopback/rest';
-import {
-Role,
-PermisoRole,
-Permiso,
-} from '../models';
+import {Permiso, Role} from '../models';
 import {RoleRepository} from '../repositories';
 
 export class RolePermisoController {
   constructor(
     @repository(RoleRepository) protected roleRepository: RoleRepository,
-  ) { }
+  ) {}
 
   @get('/roles/{id}/permisos', {
     responses: {
@@ -43,7 +40,7 @@ export class RolePermisoController {
     @param.path.string('id') id: string,
     @param.query.object('filter') filter?: Filter<Permiso>,
   ): Promise<Permiso[]> {
-    return this.roleRepository.tiene_permisos(id).find(filter);
+    return this.roleRepository.tienePermisos(id).find(filter);
   }
 
   @post('/roles/{id}/permisos', {
@@ -55,7 +52,7 @@ export class RolePermisoController {
     },
   })
   async create(
-    @param.path.string('id') id: typeof Role.prototype._id,
+    @param.path.string('id') id: typeof Role.prototype.id,
     @requestBody({
       content: {
         'application/json': {
@@ -65,9 +62,10 @@ export class RolePermisoController {
           }),
         },
       },
-    }) permiso: Omit<Permiso, 'id'>,
+    })
+    permiso: Omit<Permiso, 'id'>,
   ): Promise<Permiso> {
-    return this.roleRepository.tiene_permisos(id).create(permiso);
+    return this.roleRepository.tienePermisos(id).create(permiso);
   }
 
   @patch('/roles/{id}/permisos', {
@@ -88,9 +86,10 @@ export class RolePermisoController {
       },
     })
     permiso: Partial<Permiso>,
-    @param.query.object('where', getWhereSchemaFor(Permiso)) where?: Where<Permiso>,
+    @param.query.object('where', getWhereSchemaFor(Permiso))
+    where?: Where<Permiso>,
   ): Promise<Count> {
-    return this.roleRepository.tiene_permisos(id).patch(permiso, where);
+    return this.roleRepository.tienePermisos(id).patch(permiso, where);
   }
 
   @del('/roles/{id}/permisos', {
@@ -103,8 +102,9 @@ export class RolePermisoController {
   })
   async delete(
     @param.path.string('id') id: string,
-    @param.query.object('where', getWhereSchemaFor(Permiso)) where?: Where<Permiso>,
+    @param.query.object('where', getWhereSchemaFor(Permiso))
+    where?: Where<Permiso>,
   ): Promise<Count> {
-    return this.roleRepository.tiene_permisos(id).delete(where);
+    return this.roleRepository.tienePermisos(id).delete(where);
   }
 }

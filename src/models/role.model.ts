@@ -1,7 +1,7 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
-import {Usuario} from './usuario.model';
-import {Permiso} from './permiso.model';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {PermisoRole} from './permiso-role.model';
+import {Permiso} from './permiso.model';
+import {Usuario} from './usuario.model';
 
 @model()
 export class Role extends Entity {
@@ -10,7 +10,7 @@ export class Role extends Entity {
     id: true,
     generated: true,
   })
-  _id?: string;
+  id?: string;
 
   @property({
     type: 'string',
@@ -18,16 +18,17 @@ export class Role extends Entity {
   })
   nombre: string;
 
-  @property({
-    type: 'string',
-  })
-  id_role?: string;
-
   @hasMany(() => Usuario, {keyTo: 'id_role'})
   usuarios: Usuario[];
 
-  @hasMany(() => Permiso, {through: {model: () => PermisoRole, keyFrom: 'id_role', keyTo: 'id_permiso'}})
-  tiene_permisos: Permiso[];
+  @hasMany(() => Permiso, {
+    through: {
+      model: () => PermisoRole,
+      keyFrom: 'id_role',
+      keyTo: 'id_permiso',
+    },
+  })
+  tienePermisos: Permiso[];
 
   constructor(data?: Partial<Role>) {
     super(data);

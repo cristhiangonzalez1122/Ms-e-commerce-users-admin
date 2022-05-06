@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {belongsTo, Entity, model, property} from '@loopback/repository';
 import {Role} from './role.model';
 
 @model()
@@ -21,13 +21,19 @@ export class Usuario extends Entity {
     type: 'string',
     required: true,
   })
-  correo: string;
+  apellidos: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  clave: string;
+  correo: string;
+
+  @property({
+    type: 'string',
+    required: false,
+  })
+  clave?: string;
 
   @property({
     type: 'boolean',

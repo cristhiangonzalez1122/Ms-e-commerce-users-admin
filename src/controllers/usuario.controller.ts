@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -18,13 +19,17 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {Usuario} from '../models';
+import {Credentials, Usuario} from '../models';
+import {ChangePassword} from '../models/change-password.model';
 import {UsuarioRepository} from '../repositories';
+import {AdministradorDeClavesService} from '../services';
 
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
     public usuarioRepository: UsuarioRepository,
+    @service(AdministradorDeClavesService)
+    public passwordAdmin: AdministradorDeClavesService,
   ) {}
 
   @post('/usuarios')
@@ -45,7 +50,14 @@ export class UsuarioController {
     })
     usuario: Omit<Usuario, 'id'>,
   ): Promise<Usuario> {
-    return this.usuarioRepository.create(usuario);
+    const password = this.passwordAdmin.generatePassword();
+    const encryptPassword = this.passwordAdmin.encryptText(password);
+    usuario.clave = encryptPassword;
+    const createdUser = await this.usuarioRepository.create(usuario);
+    if (createdUser) {
+      // enviar clave por email
+    }
+    return createdUser;
   }
 
   @get('/usuarios/count')
@@ -146,5 +158,82 @@ export class UsuarioController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.usuarioRepository.deleteById(id);
+  }
+
+  /**
+   * Metodos Adicionales
+   */
+
+  @post('/authenticate-user')
+  @response(200, {
+    description: 'authenticate User model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Credentials)}},
+  })
+  async authenticateUser(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Credentials, {
+            title: 'authenticate user',
+          }),
+        },
+      },
+    })
+    credentials: Credentials,
+  ): Promise<Usuario | null> {
+    const user = await this.usuarioRepository.findOne({
+      where: {
+        correo: credentials.user,
+        clave: credentials.password,
+      },
+    });
+    if (user) {
+      //generar un token y agregarlo a la respuesta
+    }
+    return user;
+  }
+
+  @post('/change-password')
+  @response(200, {
+    description: 'Change User Password',
+    content: {'application/json': {schema: getModelSchemaRef(ChangePassword)}},
+  })
+  async changePassword(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(ChangePassword, {
+            title: 'Change your Password',
+          }),
+        },
+      },
+    })
+    changepassword: ChangePassword,
+  ): Promise<boolean> {
+    const resp = await this.passwordAdmin.changePassword(changepassword);
+    if (resp) {
+      //invocar al servicio de notificacion al usuario
+    }
+    return resp;
+  }
+
+  @post('/recover-password')
+  @response(200, {
+    description: 'recover User Password',
+    content: {'application/json': {schema: {}}},
+  })
+  async recoveryPassword(
+    @requestBody({
+      content: {
+        'application/json': {},
+      },
+    })
+    email: string,
+  ): Promise<Usuario | null> {
+    const user = await this.passwordAdmin.recoverPassword(email);
+    if (user) {
+      //invocar al servicio de notificacion al usuario con la nueva clave
+    }
+    return user;
   }
 }

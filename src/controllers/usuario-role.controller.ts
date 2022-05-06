@@ -1,22 +1,14 @@
-import {
-  repository,
-} from '@loopback/repository';
-import {
-  param,
-  get,
-  getModelSchemaRef,
-} from '@loopback/rest';
-import {
-  Usuario,
-  Role,
-} from '../models';
+/* eslint-disable @typescript-eslint/naming-convention */
+import {repository} from '@loopback/repository';
+import {get, getModelSchemaRef, param} from '@loopback/rest';
+import {Role, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 
 export class UsuarioRoleController {
   constructor(
     @repository(UsuarioRepository)
     public usuarioRepository: UsuarioRepository,
-  ) { }
+  ) {}
 
   @get('/usuarios/{id}/role', {
     responses: {

@@ -39,12 +39,12 @@ export class RoleRepository extends DefaultCrudRepository<
   ) {
     super(Role, dataSource);
     this.tienePermisos = this.createHasManyThroughRepositoryFactoryFor(
-      'tiene_permisos',
+      'tienePermisos',
       permisoRepositoryGetter,
       permisoRoleRepositoryGetter,
     );
     this.registerInclusionResolver(
-      'tiene_permisos',
+      'tienePermisos',
       this.tienePermisos.inclusionResolver,
     );
     this.usuarios = this.createHasManyRepositoryFactoryFor(

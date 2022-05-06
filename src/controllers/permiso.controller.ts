@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import {
   Count,
   CountSchema,
@@ -7,13 +8,13 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
@@ -23,7 +24,7 @@ import {PermisoRepository} from '../repositories';
 export class PermisoController {
   constructor(
     @repository(PermisoRepository)
-    public permisoRepository : PermisoRepository,
+    public permisoRepository: PermisoRepository,
   ) {}
 
   @post('/permisos')
@@ -52,9 +53,7 @@ export class PermisoController {
     description: 'Permiso model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Permiso) where?: Where<Permiso>,
-  ): Promise<Count> {
+  async count(@param.where(Permiso) where?: Where<Permiso>): Promise<Count> {
     return this.permisoRepository.count(where);
   }
 
@@ -106,7 +105,8 @@ export class PermisoController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Permiso, {exclude: 'where'}) filter?: FilterExcludingWhere<Permiso>
+    @param.filter(Permiso, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Permiso>,
   ): Promise<Permiso> {
     return this.permisoRepository.findById(id, filter);
   }

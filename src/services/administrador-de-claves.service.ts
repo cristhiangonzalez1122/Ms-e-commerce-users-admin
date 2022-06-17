@@ -13,7 +13,9 @@ export class AdministradorDeClavesService {
     public usuarioRepository: UsuarioRepository,
   ) {}
 
-  async changePassword(changepassword: ChangePassword): Promise<boolean> {
+  async changePassword(
+    changepassword: ChangePassword,
+  ): Promise<Usuario | null> {
     const user = await this.usuarioRepository.findOne({
       where: {
         id: changepassword.userId,
@@ -23,9 +25,9 @@ export class AdministradorDeClavesService {
     if (user) {
       user.clave = changepassword.newPassword;
       await this.usuarioRepository.updateById(changepassword.userId, user);
-      return true;
+      return user;
     } else {
-      return false;
+      return null;
     }
   }
 

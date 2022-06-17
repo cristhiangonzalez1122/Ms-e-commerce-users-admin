@@ -19,10 +19,11 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {Credentials, Usuario} from '../models';
+import {Configuration} from '../keys/config';
+import {Credentials, NotificacionCorreo, Usuario} from '../models';
 import {ChangePassword} from '../models/change-password.model';
 import {UsuarioRepository} from '../repositories';
-import {AdministradorDeClavesService} from '../services';
+import {AdministradorDeClavesService, NotificationsService} from '../services';
 
 export class UsuarioController {
   constructor(
@@ -30,6 +31,8 @@ export class UsuarioController {
     public usuarioRepository: UsuarioRepository,
     @service(AdministradorDeClavesService)
     public passwordAdmin: AdministradorDeClavesService,
+    @service(NotificationsService)
+    public serviceNotification: NotificationsService,
   ) {}
 
   @post('/usuarios')
@@ -55,7 +58,11 @@ export class UsuarioController {
     usuario.clave = encryptPassword;
     const createdUser = await this.usuarioRepository.create(usuario);
     if (createdUser) {
-      // enviar clave por email
+      const data = new NotificacionCorreo();
+      data.destinatario = usuario.correo;
+      data.asunto = Configuration.asuntoCreacionUsuario;
+      data.mensaje = `${Configuration.saludo} ${usuario.nombre}" "${usuario.apellidos} <br /> ${Configuration.usuarioCreado} ${password}`;
+      this.serviceNotification.sendEmail(data);
     }
     return createdUser;
   }
@@ -188,7 +195,7 @@ export class UsuarioController {
       },
     });
     if (user) {
-      //generar un token y agregarlo a la respuesta
+      user.clave = '';
     }
     return user;
   }
@@ -210,11 +217,15 @@ export class UsuarioController {
     })
     changepassword: ChangePassword,
   ): Promise<boolean> {
-    const resp = await this.passwordAdmin.changePassword(changepassword);
-    if (resp) {
-      //invocar al servicio de notificacion al usuario
+    const user = await this.passwordAdmin.changePassword(changepassword);
+    if (user) {
+      const data = new NotificacionCorreo();
+      data.destinatario = user.correo;
+      data.asunto = Configuration.asuntoCambioClave;
+      data.mensaje = `${Configuration.saludo} ${user.nombre}" "${user.apellidos} <br /> ${Configuration.changePasswordMessage}`;
+      this.serviceNotification.sendEmail(data);
     }
-    return resp;
+    return user != null;
   }
 
   @post('/recover-password')

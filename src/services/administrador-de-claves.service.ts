@@ -44,20 +44,4 @@ export class AdministradorDeClavesService {
     const encrypt = CryptoJS.MD5(text).toString();
     return encrypt;
   }
-
-  async recoverPassword(email: string): Promise<Usuario | null> {
-    const user = await this.usuarioRepository.findOne({
-      where: {
-        correo: email,
-      },
-    });
-    if (user) {
-      const password = this.generatePassword();
-      user.clave = this.encryptText(password);
-      await this.usuarioRepository.updateById(user.id, user);
-      return user;
-    } else {
-      return null;
-    }
-  }
 }

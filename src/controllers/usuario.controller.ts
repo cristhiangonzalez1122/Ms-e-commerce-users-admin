@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/naming-convention */
 import {service} from '@loopback/core';
 import {
@@ -20,7 +21,13 @@ import {
   response,
 } from '@loopback/rest';
 import {Configuration} from '../keys/config';
-import {Credentials, NotificacionCorreo, Usuario} from '../models';
+import {
+  CredencialesRecuperarClave,
+  Credentials,
+  NotificacionCorreo,
+  NotificacionSms,
+  Usuario,
+} from '../models';
 import {ChangePassword} from '../models/change-password.model';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorDeClavesService, NotificationsService} from '../services';
@@ -239,11 +246,22 @@ export class UsuarioController {
         'application/json': {},
       },
     })
-    email: string,
+    credenciales: CredencialesRecuperarClave,
   ): Promise<Usuario | null> {
-    const user = await this.passwordAdmin.recoverPassword(email);
+    const user = await this.usuarioRepository.findOne({
+      where: {
+        correo: credenciales.email,
+      },
+    });
     if (user) {
-      //invocar al servicio de notificacion al usuario con la nueva clave
+      const clave = this.passwordAdmin.generatePassword();
+      const claveCifrada = this.passwordAdmin.encryptText(clave);
+      user.clave = this.passwordAdmin.encryptText(claveCifrada);
+      await this.usuarioRepository.updateById(user.id, user);
+      const data = new NotificacionSms();
+      data.destino = user.celular;
+      data.mensaje = `${Configuration.saludo} ${user.nombre} ${user.apellidos}${Configuration.mensajeRecuperarClave} ${clave}`;
+      this.serviceNotification.sendSms(data);
     }
     return user;
   }

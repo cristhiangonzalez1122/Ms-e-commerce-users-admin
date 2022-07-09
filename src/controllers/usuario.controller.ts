@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/naming-convention */
 import {service} from '@loopback/core';
@@ -30,7 +32,11 @@ import {
 } from '../models';
 import {ChangePassword} from '../models/change-password.model';
 import {UsuarioRepository} from '../repositories';
-import {AdministradorDeClavesService, NotificationsService} from '../services';
+import {
+  AdministradorDeClavesService,
+  NotificationsService,
+  SesionUsuariosService,
+} from '../services';
 
 export class UsuarioController {
   constructor(
@@ -40,6 +46,8 @@ export class UsuarioController {
     public passwordAdmin: AdministradorDeClavesService,
     @service(NotificationsService)
     public serviceNotification: NotificationsService,
+    @service(SesionUsuariosService)
+    private servicioSesionUsuario: SesionUsuariosService,
   ) {}
 
   @post('/usuarios')
@@ -194,17 +202,20 @@ export class UsuarioController {
       },
     })
     credentials: Credentials,
-  ): Promise<Usuario | null> {
-    const user = await this.usuarioRepository.findOne({
-      where: {
-        correo: credentials.user,
-        clave: credentials.password,
-      },
-    });
-    if (user) {
-      user.clave = '';
+  ): Promise<Usuario | any> {
+    const usuario = await this.servicioSesionUsuario.identificarUsuario(
+      credentials,
+    );
+    let tk = '';
+
+    if (usuario) {
+      usuario.clave = '';
+      tk = await this.servicioSesionUsuario.generarToken(usuario);
     }
-    return user;
+    return {
+      token: tk,
+      usuario: usuario,
+    };
   }
 
   @post('/change-password')
